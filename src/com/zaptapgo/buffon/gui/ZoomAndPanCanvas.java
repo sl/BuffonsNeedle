@@ -8,10 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 
-import com.zaptapgo.buffon.Main;
 import com.zaptapgo.buffon.needle.Needle;
  
 /**

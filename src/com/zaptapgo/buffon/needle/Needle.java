@@ -1,7 +1,5 @@
 package com.zaptapgo.buffon.needle;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.zaptapgo.buffon.Main;
@@ -22,9 +20,7 @@ public class Needle {
 		this.y2 = y2;
 		try {
 			needles.put(this);
-		} catch (InterruptedException e) {
-		
-		}
+		} catch (InterruptedException e) {}
 		if (needles.size() > Main.MAXIMUM_DRAWN_NEEDLES) {
 			try {
 				needles.take();
