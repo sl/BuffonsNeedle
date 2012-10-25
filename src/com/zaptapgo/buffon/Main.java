@@ -59,7 +59,10 @@ public class Main {
 	
 	public static JTextField nLength;
 	
+	public static JLabel percent;
+	
 	public static void main(String[] args) {
+		//Create the GUI
 		frame = new JFrame("Buffon");
         tools = new JFrame("Tools");
         results = new JFrame("Results");
@@ -69,7 +72,6 @@ public class Main {
         Box uiPanel = Box.createVerticalBox();
         count = new JLabel("Needles: 0");
         JSlider slider = new JSlider(0, MAX_NEEDLES_PER_SECOND, 0);
-
         slider.addChangeListener(new ChangeListener() {
 			
 			@Override
@@ -176,11 +178,13 @@ public class Main {
         JPanel resultsPanel = new JPanel();
         onTarget = new JLabel("On Target: 0");
         offTarget = new JLabel("Off Target: 0");
+        percent = new JLabel("Percent Hit: ?");
         pi = new JLabel("Appx Pi: ???");
         resultsBox.add(count, BorderLayout.WEST);
         resultsBox.add(onTarget, BorderLayout.WEST);
         resultsBox.add(offTarget, BorderLayout.WEST);
        // results.add(pi, BorderLayout.WEST);
+        resultsBox.add(percent, BorderLayout.WEST);
         resultsBox.add(pi, BorderLayout.WEST);
         resultsPanel.add(resultsBox);
         results.add(resultsPanel);
@@ -205,45 +209,43 @@ public class Main {
 			}
 			
 			@Override
-			public void keyReleased(KeyEvent e) {
-				
-			}
+			public void keyReleased(KeyEvent e) {}
 			
 			@Override
-			public void keyPressed(KeyEvent e) {
-				
-			}
+			public void keyPressed(KeyEvent e) {}
 		});
         frame.setVisible(true);
     }
 	
-	 /*private static void bringToFront() {
-	        java.awt.EventQueue.invokeLater(new Runnable() {
-	            @Override
-	            public void run() {
-	                if(tools != null) {
-	                    tools.toFront();
-	                    tools.repaint();
-	                }
-	            }
-	        });
-	    } */
-	
-	
-	
 	private static class GameLoop implements Runnable {
 		
+		/**
+		 * Is the Main render loop running
+		 */
 		boolean isRunning;
+		/**
+		 * The Main Canvas on which to draw the simulations output
+		 */
 		ZoomAndPanCanvas gui;
+		/**
+		 * A time adjustment made to ensure a constant FPS (frames per second)
+		 */
 		long cycleTime;
+		/**
+		 * Incremented each frame and reset at 50, used to determine one
+		 * seccond without increasing computation time assuming that the FPS is constant
+		 */
 		private int increment;
+
+		/**
+		 * The last time an update was called
+		 */
+	    long lastTime = 0L;
 		
-	//    float dx = 0.0f;
-	//    float dy = 0.0f;
-    //    float dt = 0.0f; //length of frame
-	    long lastTime = 0L; // when the last frame was
-	//    float time = 0.0f;
-		
+	    /**
+	     * Creates a new GameLoop object representing the main render, and logic loop
+	     * @param canvas The canvas to render to
+	     */
 		public GameLoop(ZoomAndPanCanvas canvas){
 			this.gui = canvas;
 			this.isRunning = true;
@@ -261,15 +263,20 @@ public class Main {
 			}
 		}
 		
+		/**
+		 * Sends a message to the Java.awt render Thread to draw the current
+		 * output to the screen.
+		 * @param strat The Bufferstrategy to draw to
+		 */
 		private void updateGui(BufferStrategy strat) {
 			ZoomAndPanCanvas canvas = ZoomAndPanCanvas.maincanvas;
-			canvas.repaint();
-			/*Graphics2D g = (Graphics2D) strat.getDrawGraphics();
-	        strat.show();
-	        g.dispose(); */
-			
+			canvas.repaint();			
 		}
 		
+		/**
+		 * Delays the next tick until a certain time has passed
+		 * to ensure a constant FPS
+		 */
 		private void synchFramerate() {
 			cycleTime = cycleTime + FRAME_DELAY;
 			long difference = cycleTime - System.currentTimeMillis();
@@ -281,6 +288,9 @@ public class Main {
 			}
 		}
 		
+		/**
+		 * Does one tick of the main logic loop
+		 */
 		private void doWorldTick(){
 			int repetitions = 0;
 			if (Main.needlesPerSecond > 50) {
@@ -294,14 +304,18 @@ public class Main {
 				}
 			}
 			for (int i = 0; i < repetitions; i++) {
-				//100000000000/10000000
+				//Generate random doubles from 0 - 1 and adjust the value so it lies
+				//as a more prescise decimal value in the range of -10000 to 10000
 				double x = (rand.nextDouble() * (10001 + 10000)) - 10000;
-			//	float x = rand.nextInt(10001 + 10000) - 10000;
 				double y = (rand.nextDouble() * (10001 + 10000)) - 10000;
-			//	float y = rand.nextInt(10001 + 10000) - 10000;
+				//Generate a random angle from 0 - 360 degrees, from a random
+				//double from 0-1 for added prescision
 				double a = (rand.nextDouble() * 360);
+				//Get the point one needle length away from the first point,
+				//when traveling in angle a
 				double x2 = (x + needleDiameter * Math.cos(Math.toRadians(a)));
 				double y2 = (y + needleDiameter * Math.sin(Math.toRadians(a)));
+				//Create a new needle using those coordinates
 				Needle n = new Needle(x, y, x2, y2);
 				Counter.total++;
 				for (int h = -10000; h <= 10000; h += 100) {
@@ -311,9 +325,13 @@ public class Main {
 					}
 				}
 			}
+			//Update the GUI
 			increment++;
 			if (increment >= 50) {
+				//Do this only once every second due to large computational complexity (Multiple
+				//costly division operations)
 				Thread calculate = new Thread(new Counter(true));
+				//Set to Minimum priority so as not to interfere with the display of the simulation
 				calculate.setPriority(Thread.MIN_PRIORITY);
 				calculate.run();
 				increment = 0;

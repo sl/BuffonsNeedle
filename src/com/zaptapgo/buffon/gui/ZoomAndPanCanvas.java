@@ -10,13 +10,11 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
 import com.zaptapgo.buffon.needle.Needle;
- 
+
 /**
- * Canvas displaying a simple drawing: the coordinate-system axes + some points and their coordinates.
- * It is used to demonstrate the Zoom and Pan functionality.
- *
- * @author Sorin Postelnicu
- * @since July 13, 2009
+ * A modification of the ZoomAndPanCanvas class, originally designed by Sorin Postelnicu,
+ * but changed to allow for more flexible drawing, faster, less complex matrix mathematics,
+ * and other functions specific to this application.
  */
  
 public class ZoomAndPanCanvas extends Canvas {
@@ -98,9 +96,10 @@ public class ZoomAndPanCanvas extends Canvas {
         	}
         	alt++;
         }
+        
+        //TODO Add Option for horizontal gridlines, as well as Polar gridlines.
+        
         //Draw needles
-    /*    int delete = Needle.needles.size() - Main.MAXIMUM_DRAWN_NEEDLES;
-        delete = (delete <= 0) ? 0 : delete; */
         for (Needle n : Needle.needles) {
         	if (n == null) {
         		System.out.println("One of the needles was null!");

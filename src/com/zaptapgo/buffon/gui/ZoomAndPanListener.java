@@ -7,11 +7,11 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
  
 /**
- * Listener that can be attached to a Component to implement Zoom and Pan functionality.
- *
- * @author Sorin Postelnicu
- * @since Jul 14, 2009
+ * A modification of the ZoomAndPanListener class, originally designed by Sorin Postelnicu,
+ * but changed to allow for more flexible drawing, faster, less complex matrix mathematics,
+ * and other functions specific to this application.
  */
+
 public class ZoomAndPanListener implements MouseListener, MouseMotionListener, MouseWheelListener {
     public static final int DEFAULT_MIN_ZOOM_LEVEL = -20;
     public static final int DEFAULT_MAX_ZOOM_LEVEL = 18;

@@ -20,26 +20,17 @@ public class Counter implements Runnable {
 	
 	@Override
 	public void run() {
+		//Calculate, and display an approximate result for Pi, this is done in a separate
+		//thread so as not to cause temporary freezing while doing the calculation
 		offTarget = total - onTarget;
-		
-//		BigDecimal onTargetBig ``= new BigDecimal(onTarget);
-//		BigDecimal offTargetBig = new BigDecimal(offTarget);
-//		BigDecimal needlesSizeBig = new BigDecimal(total);
-	//	BigDecimal onTargetPercent = onTargetBig.divide(needlesSizeBig).multiply(new BigDecimal(100));
-	//	BigDecimal offTargetPercent = offTargetBig.divide(needlesSizeBig).multiply(new BigDecimal(100));
-		//System.out.println("Percent On Target: " + onTarget);
-		//System.out.println("Percent Off Target: " + offTarget);
-		
-		// 2 * total drop / number of hits should appx equal pi
-		//BigDecimal piAppx = needlesSizeBig.multiply(new BigDecimal(2));
-	//	piAppx = piAppx.divide(onTargetBig)
 		double piAppx = ((double) (2 * total) / (double) onTarget);
 		String piPrint = "pi is equal to appx. : " + ((Double.isNaN(piAppx)) ?
 				"??? (There are no needles on the grid!)" : piAppx);
-		//System.out.println(piPrint);
 		Main.onTarget.setText("On Target: " + onTarget);
 		Main.offTarget.setText("Off Target: " + offTarget);
-		Main.pi.setText("Appx Pi: " + ((Double.isNaN(piAppx) ? "???" : piAppx)));
+		Main.pi.setText("Appx Pi: " + ((Double.isNaN(piAppx) ? "?" : piAppx)));
+		double percentOnTarget = 100.0F * ((double) onTarget / (double) total);
+		Main.percent.setText("Percent Hit: " + ((Double.isNaN(percentOnTarget) ? "?" : percentOnTarget)));
 		Main.results.pack();
 		if (!debug) {
 			JOptionPane.showMessageDialog(Main.frame, ("Hits: " + onTarget + "\nMisses: " + offTarget
