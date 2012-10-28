@@ -9,6 +9,7 @@ import java.awt.Point;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
+import com.zaptapgo.buffon.Main;
 import com.zaptapgo.buffon.needle.Needle;
 
 /**
@@ -87,16 +88,38 @@ public class ZoomAndPanCanvas extends Canvas {
             // Restore the viewport after it was updated by the ZoomAndPanListener
             g.setTransform(zoomAndPanListener.getCoordTransform());
         }
+        
         //Do rendering of uniform verticle gridlines
         int alt = 0;
-        for (int x = -10000; x <= 10000; x += 100) {
-        	if ((alt % 2) == 0) {
-        		g.setColor(Color.DARK_GRAY);
-        		g.fillRect(x + 1, -10000, 99, 20000);
+        switch (Main.gridMode) {
+        case 0:
+        	for (int x = -10000; x <= 10000; x += 100) {
+        		if ((alt % 2) == 0) {
+        			g.setColor(Color.DARK_GRAY);
+        			g.fillRect(x + 1, -10000, 99, 20000);
+        		}
+        		alt++;
         	}
-        	alt++;
+        	break;
+        case 1:
+        	g.setColor(Color.WHITE);
+        	g.drawOval(-100, -100, 200, 200);
+        	for (int rad = 20000; rad > 0; rad -= 100) {
+        		if ((alt % 2) == 0) {
+        			g.setColor(Color.DARK_GRAY);
+        		} else {
+        			g.setColor(Color.BLACK);
+        		}
+        		g.fillOval(-rad, -rad, (2 * rad) , (2 * rad));
+        		alt++;
+        	}
+        	break;
         }
-        
+        g.setColor(Color.BLACK);
+        g.fillRect(-20000, -20000, 9900, 40000);
+        g.fillRect(-20000, 10000, 40000, 9900);
+        g.fillRect(-20000, -20000, 40000, 10000);
+        g.fillRect(10100, -20000, 9900, 40000);
         //TODO Add Option for horizontal gridlines, as well as Polar gridlines.
         
         //Draw needles

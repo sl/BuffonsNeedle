@@ -10,11 +10,13 @@ import java.util.Date;
 import java.util.Random;
 
 import javax.swing.Box;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
@@ -25,7 +27,7 @@ import com.zaptapgo.buffon.gui.ZoomAndPanCanvas;
 import com.zaptapgo.buffon.needle.Counter;
 import com.zaptapgo.buffon.needle.Needle;
 
-public class Main {
+public class Main implements ActionListener {
 	
 	public static final int FRAME_DELAY = 20; //A frame delay of 20 is approximately 50 frames per second
 	
@@ -47,6 +49,8 @@ public class Main {
 	
 	public static JFrame results;
 	
+	public static JFrame grid;
+	
 	public static JLabel count;
 	
 	public static JLabel value;
@@ -61,11 +65,33 @@ public class Main {
 	
 	public static JLabel percent;
 	
+	public static int gridMode = 0;
+	
 	public static void main(String[] args) {
 		//Create the GUI
 		frame = new JFrame("Buffon");
         tools = new JFrame("Tools");
         results = new JFrame("Results");
+        grid = new JFrame("Grid Type");
+        Box buttonsBox = Box.createHorizontalBox();
+        ButtonGroup group = new ButtonGroup();
+        JRadioButton sgrid = new JRadioButton("Standard");
+        sgrid.setActionCommand("0");
+        sgrid.setSelected(true);
+        JRadioButton polar = new JRadioButton("Polar");
+        polar.setActionCommand("1");
+        group.add(sgrid);
+        group.add(polar);
+        buttonsBox.add(sgrid);
+        buttonsBox.add(polar);
+        Main main = new Main();
+        sgrid.addActionListener(main);
+        polar.addActionListener(main);
+        JPanel gridPanel = new JPanel();
+        gridPanel.add(buttonsBox);
+        grid.add(gridPanel);
+        grid.setVisible(true);
+        grid.setAlwaysOnTop(true);
         tools.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         results.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         JPanel panel = new JPanel();
@@ -318,10 +344,24 @@ public class Main {
 				//Create a new needle using those coordinates
 				Needle n = new Needle(x, y, x2, y2);
 				Counter.total++;
-				for (int h = -10000; h <= 10000; h += 100) {
-					if ((n.x1 < h && n.x2 > h) || (n.x1 > h && n.x2 < h)) {
-						Counter.onTarget++;
-						break;
+				switch (gridMode) {
+				case 0:
+					for (int h = -10000; h <= 10000; h += 100) {
+						if ((n.x1 < h && n.x2 > h) || (n.x1 > h && n.x2 < h)) {
+							Counter.onTarget++;
+							break;
+						}
+					}
+					break;
+				case 1:
+					for (int h = 100; h <= 10000; h += 100) {
+						if (((n.x1 * n.x1) + (n.y1 * n.y1) > (h * h) &&
+								(n.x2 * n.x2) + (n.y2 * n.y2) < (h * h)) ||
+								((n.x1 * n.x1) + (n.y1 * n.y1) < (h * h) &&
+								(n.x2 * n.x2) + (n.y2 * n.y2) > (h * h))) {
+							Counter.onTarget++;
+							break;
+						}
 					}
 				}
 			}
@@ -342,6 +382,13 @@ public class Main {
 			Main.value.setText("Needles per second: " + Main.needlesPerSecond);
 		}
 		
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		System.out.println("Changed to " + e.getActionCommand());
+		int newGrid = Integer.parseInt(e.getActionCommand());
+		gridMode = newGrid;
 	}
 	
 	
