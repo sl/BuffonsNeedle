@@ -90,9 +90,10 @@ public class ZoomAndPanCanvas extends Canvas {
         }
         
         //Do rendering of uniform verticle gridlines
-        int alt = 0;
+        int alt;
         switch (Main.gridMode) {
         case 0:
+        	alt = 0;
         	for (int x = -10000; x <= 10000; x += 100) {
         		if ((alt % 2) == 0) {
         			g.setColor(Color.DARK_GRAY);
@@ -102,6 +103,7 @@ public class ZoomAndPanCanvas extends Canvas {
         	}
         	break;
         case 1:
+        	alt = 0;
         	g.setColor(Color.WHITE);
         	g.drawOval(-100, -100, 200, 200);
         	for (int rad = 20000; rad > 0; rad -= 100) {
@@ -111,6 +113,24 @@ public class ZoomAndPanCanvas extends Canvas {
         			g.setColor(Color.BLACK);
         		}
         		g.fillOval(-rad, -rad, (2 * rad) , (2 * rad));
+        		alt++;
+        	}
+        	break;
+        case 2:
+        	alt = 0;
+        	for (int x = -10000; x <= 10000; x += 100) {
+        		int alt2 = 0;
+        		if ((alt % 2) == 0) {
+        			alt2 = 1;
+        		}
+        		for (int y = -10000; y <= 10000; y+= 100) {
+            		if ((alt2 % 2) == 0) {
+            			g.setColor(Color.DARK_GRAY);
+            			g.fillRect(x + 1, y + 1, 99, 99);
+            		}
+            		alt2++;
+            	}
+        		g.setColor(Color.BLACK);
         		alt++;
         	}
         	break;

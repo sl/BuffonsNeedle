@@ -14,7 +14,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
@@ -78,15 +77,20 @@ public class Main implements ActionListener {
         JRadioButton sgrid = new JRadioButton("Standard");
         sgrid.setActionCommand("0");
         sgrid.setSelected(true);
-        JRadioButton polar = new JRadioButton("Polar");
+        JRadioButton polar = new JRadioButton("Polar (broken)");
         polar.setActionCommand("1");
+        JRadioButton hgrid = new JRadioButton("Full Grid");
+        hgrid.setActionCommand("2");
         group.add(sgrid);
+        group.add(hgrid);
         group.add(polar);
         buttonsBox.add(sgrid);
         buttonsBox.add(polar);
+        buttonsBox.add(hgrid);
         Main main = new Main();
         sgrid.addActionListener(main);
         polar.addActionListener(main);
+        hgrid.addActionListener(main);
         JPanel gridPanel = new JPanel();
         gridPanel.add(buttonsBox);
         grid.add(gridPanel);
@@ -168,17 +172,6 @@ public class Main implements ActionListener {
 					 Main.nLength.setText(String.valueOf(Main.needleDiameter));
 					 UIManager.getLookAndFeel().provideErrorFeedback(Main.nLength); 
 					 return;
-				 }
-				 if (newNeedleLength <= 50) {
-					 if (ZoomAndPanCanvas.maincanvas != null) {
-						 System.out.println("Zoom: " + ZoomAndPanCanvas.maincanvas.zoomAndPanListener.getZoomLevel());
-						 if(ZoomAndPanCanvas.maincanvas.zoomAndPanListener.getZoomLevel() > 0) {
-							 ZoomAndPanCanvas.maincanvas.zoomAndPanListener.setZoomLevel(0);
-							 JOptionPane.showMessageDialog(Main.frame, "Zooming out with small needle diameters may result"
-									 + " in an extreme performance decrease, or crashing, try to remain zoomed in, with"
-									 + " needles with a size of less than 50!");
-						 }
-					 }
 				 }
 				 Main.needleDiameter = newNeedleLength;
 			}
@@ -346,14 +339,26 @@ public class Main implements ActionListener {
 				Counter.total++;
 				switch (gridMode) {
 				case 0:
-					for (int h = -10000; h <= 10000; h += 100) {
+					//Old intersection checking formula
+					//O = 2^n
+					/*for (int h = -10000; h <= 10000; h += 100) {
 						if ((n.x1 < h && n.x2 > h) || (n.x1 > h && n.x2 < h)) {
 							Counter.onTarget++;
 							break;
 						}
+					} */
+					
+					//New faster intersection checking formula, would work on a
+					//infinetely expanding grid, and requires no loops,
+					// O = 2
+					if (Util.floorToMultiple(n.x1, 100) != Util.floorToMultiple(n.x2, 100)) { 
+						Counter.onTarget++;
 					}
 					break;
 				case 1:
+					//INACURATE! This is a rough approximation of if th eneedle
+					//crosses the polar grid, this is not exact, and with larger
+					//needles, the inacuracies become more apparent.
 					for (int h = 100; h <= 10000; h += 100) {
 						if (((n.x1 * n.x1) + (n.y1 * n.y1) > (h * h) &&
 								(n.x2 * n.x2) + (n.y2 * n.y2) < (h * h)) ||
@@ -363,6 +368,18 @@ public class Main implements ActionListener {
 							break;
 						}
 					}
+					break;
+				case 2:
+					//Check if needle crosses on y axis
+					boolean flag = Util.floorToMultiple(n.x1, 100) !=
+							Util.floorToMultiple(n.x2, 100);
+					//Check if needle crosses on x axis
+					boolean flag2 = Util.floorToMultiple(n.y1, 100) !=
+							Util.floorToMultiple(n.y2, 100);
+					if (flag && flag2) {
+						Counter.onTarget++;
+					}
+					break;
 				}
 			}
 			//Update the GUI
@@ -386,6 +403,8 @@ public class Main implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		//The radio button grid type selection was changed, modify the grid type according
+		//to the message recieved, and update the grid appropriately.
 		System.out.println("Changed to " + e.getActionCommand());
 		int newGrid = Integer.parseInt(e.getActionCommand());
 		gridMode = newGrid;
